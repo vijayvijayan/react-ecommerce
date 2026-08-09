@@ -1,0 +1,9 @@
+// global.d.ts
+declare global {
+    interface Window {
+        jQuery: any;
+    }
+  }
+  
+  export {};
+  
