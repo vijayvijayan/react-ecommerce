@@ -9,7 +9,7 @@ export const blogApi = createApi({
   reducerPath: "blogApi",
 
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost/api/",
+    baseUrl: process.env.REACT_APP_API_URL,
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) {

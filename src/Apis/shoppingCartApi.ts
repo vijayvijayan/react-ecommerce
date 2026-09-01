@@ -5,7 +5,7 @@ import { shoppingCartModel,shopProductModel } from "../Interface";
 const shoppingCartApi = createApi({
   reducerPath: "shoppingCartApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost/api/",
+    baseUrl: process.env.REACT_APP_API_URL,
   }),
   endpoints: (builder) => ({
     getCart: builder.query({

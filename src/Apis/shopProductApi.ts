@@ -9,7 +9,7 @@ type ShopProductPaginationParams = {
 const shopProductApi = createApi({
   reducerPath: "shopProductApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost/api/",
+    baseUrl: process.env.REACT_APP_API_URL,
     prepareHeaders: (headers, api) => {
       const token = localStorage.getItem("token");
       if (token) {
