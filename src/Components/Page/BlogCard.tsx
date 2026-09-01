@@ -25,9 +25,9 @@ export const BlogCard = ({blogItem}:BlogProp) => {
                   <li>
                     <a href="#">{blogItem.viewCount} Views <i className="lnr lnr-eye"></i></a>
                   </li>
-                  <li>
+                  {/* <li>
                     <a href="#">06 Comments <i className="lnr lnr-bubble"></i></a>
-                  </li>
+                  </li> */}
                 </ul>
               </div>
             </div>
@@ -36,9 +36,9 @@ export const BlogCard = ({blogItem}:BlogProp) => {
               <div className="blog_post">
                 <img src={SD_Url.FileUploadPath+blogItem.blogImage} alt="" />
                 <div className="blog_details">
-                  <a href="single-blog.html">
+                  <Link to={`/blogdetails/${blogItem.blogId}`}>
                     <h2>{blogItem.blogName}</h2>
-                  </a>
+                  </Link>
                   <p>
                     {blogItem.shortDescription}
                   </p>

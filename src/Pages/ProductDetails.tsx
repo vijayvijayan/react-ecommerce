@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetshopProductByIdQuery, useGetShopProductRatingByProductIdQuery, useShopProductRatingInsertMutation } from '../Apis/shopProductApi';
 import { MainLoader } from '../Components/Page/MainLoader';
@@ -30,15 +30,45 @@ export const ProductDetails = ({page_template}:PageProps) => {
   const productId = Number(shopProductId);
 const [shopProductRatingInsert]=useShopProductRatingInsertMutation();
   const {data:article_data,isLoading:article_loading}=useGetArticleNewByTemplateQuery(page_template);
+
   const { data: product_data, isLoading: product_loading } =
-    useGetshopProductByIdQuery(productId);
-const { data: productRating_data, isLoading: productRating_loading } =
-    useGetShopProductRatingByProductIdQuery(productId);
-  const { data: photogallery_data, isLoading: photogallery_loading } =
-    useGetPhotoGalleryByIdQuery({
-      galleryTypeId: productId,
-      galleryType: "shopproduct",
-    });
+  useGetshopProductByIdQuery(productId);
+
+const { data: photogallery_data, isLoading: photogallery_loading } =
+  useGetPhotoGalleryByIdQuery({
+    galleryTypeId: productId,
+    galleryType: "shopproduct",
+  });
+
+
+// ================= Photo Gallery =================
+
+const photoGalleryList: photoGalleryModel[] = useMemo(() => {
+  const productImage = product_data?.result?.productImage;
+
+  const galleryImages = photogallery_data?.result ?? [];
+
+  // No images available
+  if (!productImage && galleryImages.length === 0) {
+    return [];
+  }
+
+  // Product main image
+  const productImageObject: photoGalleryModel = {
+    id: 0,
+    title: "",
+    image: productImage,
+  };
+
+  // Product image + gallery images
+  return [
+    ...(productImage ? [productImageObject] : []),
+    ...galleryImages,
+  ];
+}, [product_data, photogallery_data]);
+
+const { data: productRating_data, isLoading: productRating_loading } = useGetShopProductRatingByProductIdQuery(productId);
+  
 
     const [overAllRating,setOverAllRating]=useState(0);
   const [productRating,setProductRating]=useState(0);  
@@ -190,37 +220,73 @@ const handleSubmit=async (e:React.FormEvent<HTMLFormElement>)=>{
       total / productRating_data.result.length
     );
   }
-    if (product_data) dispatch(setShopProduct(product_data));
-    if (photogallery_data) dispatch(setPhotogallery(photogallery_data));
-    if(article_data) dispatch(setArticleNew(article_data));
-  }, [product_data, photogallery_data,article_data,productRating_data, dispatch]);
+    // if (product_data) dispatch(setShopProduct(product_data));
+    // if (photogallery_data) dispatch(setPhotogallery(photogallery_data));
+    // if(article_data) dispatch(setArticleNew(article_data));
 
- useEffect(() => {
+  }, [product_data,article_data,productRating_data, dispatch]);
+
+//  useEffect(() => {
+//   const $ = (window as any).$;
+//   if (!$) return;
+
+//   const $carousel = $(".s_Product_carousel");
+
+//   if (!$carousel.length) return;
+
+//   // Destroy if already initialized (StrictMode safe)
+//   if ($carousel.hasClass("owl-loaded")) {
+//     $carousel.trigger("destroy.owl.carousel");
+//     $carousel.removeClass("owl-loaded");
+//     $carousel.find(".owl-stage-outer").children().unwrap();
+//   }
+
+//   // Initialize AFTER DOM render
+// $carousel.owlCarousel({
+//   items: 1,
+//   loop: true,
+//   autoplay: true,
+//   autoplayTimeout: 3000,
+//   autoplayHoverPause: true,
+//   nav: false,   // 👈 disable navigation
+//   dots: false,  // optional
+// });
+// }, [photogallery_data]); // 👈 VERY IMPORTANT
+
+// ================= Owl Carousel =================
+
+useEffect(() => {
   const $ = (window as any).$;
+
   if (!$) return;
 
   const $carousel = $(".s_Product_carousel");
 
   if (!$carousel.length) return;
 
-  // Destroy if already initialized (StrictMode safe)
+  // Destroy previous carousel
   if ($carousel.hasClass("owl-loaded")) {
     $carousel.trigger("destroy.owl.carousel");
-    $carousel.removeClass("owl-loaded");
-    $carousel.find(".owl-stage-outer").children().unwrap();
   }
 
-  // Initialize AFTER DOM render
-$carousel.owlCarousel({
-  items: 1,
-  loop: true,
-  autoplay: true,
-  autoplayTimeout: 3000,
-  autoplayHoverPause: true,
-  nav: false,   // 👈 disable navigation
-  dots: false,  // optional
-});
-}, [photogallery_data]); // 👈 VERY IMPORTANT
+  // Initialize
+  $carousel.owlCarousel({
+    items: 1,
+    loop: photoGalleryList.length > 1,
+    autoplay: photoGalleryList.length > 1,
+    autoplayTimeout: 3000,
+    autoplayHoverPause: true,
+    nav: false,
+    dots: false,
+  });
+
+  // Cleanup
+  return () => {
+    if ($carousel.hasClass("owl-loaded")) {
+      $carousel.trigger("destroy.owl.carousel");
+    }
+  };
+}, [photoGalleryList]);
 
 
 const[productCount,setProductCount]= useState(1);
@@ -247,6 +313,7 @@ const handleCart = () => {
     productId,
     count: productCount
   }));
+  toastNotify("Product added to cart");
 };
 
 
@@ -261,10 +328,10 @@ const handleCart = () => {
   if (product_loading || photogallery_loading || article_loading || productRating_loading) {
     return <MainLoader />;
   }
-  else
-  {
-    console.log(productRating_data);
-  }
+  // else
+  // {
+  //   console.log(photoGalleryList);
+  // }
   
   return (
     <>
@@ -276,7 +343,7 @@ const handleCart = () => {
 <div className="product_image_area">
   <div className="container">
     <div className="row s_product_inner">
-      <div className="col-lg-6">
+      {/* <div className="col-lg-6">
         <div className="s_Product_carousel">
           {
               photogallery_data!=null && photogallery_data.result.length>0 && photogallery_data.result.map((item:photoGalleryModel)=>(
@@ -286,8 +353,20 @@ const handleCart = () => {
           )
           )}
         </div>
+      </div> */}
+<div className="col-lg-6">
+  <div className="s_Product_carousel">
+    {photoGalleryList.map((item: photoGalleryModel) => (
+      <div className="single-prd-item" key={item.id}>
+        <img
+          className="img-fluid"
+          src={SD_Url.FileUploadPath + item.image}
+          alt={item.title || "Product Image"}
+        />
       </div>
-
+    ))}
+  </div>
+</div>
       <div className="col-lg-5 offset-lg-1">
         <div className="s_product_text">
           <h3>{product_data.result.productName}</h3>
@@ -313,6 +392,7 @@ const handleCart = () => {
           <div className="product_count">
             <label htmlFor="qty">Quantity:</label>
             <input
+            readOnly
               type="text"
               name="qty"
               id="sst"
@@ -335,12 +415,12 @@ const handleCart = () => {
             <a className="primary-btn" href="#" onClick={()=>handleCart()}>
               Add to Cart
             </a>
-            <a className="icon_btn" href="#">
+            {/* <a className="icon_btn" href="#">
               <i className="lnr lnr-diamond"></i>
             </a>
             <a className="icon_btn" href="#">
               <i className="lnr lnr-heart"></i>
-            </a>
+            </a> */}
           </div>
         </div>
       </div>

@@ -9,6 +9,8 @@ import { Blog } from "./Blog";
 import { MyBlogs } from "./MyBlogs";
 import { BlogUpsert } from "./BlogUpsert";
 import { Tracking } from "./Tracking";
+import { ContactUs } from "./ContactUs";
+import { Thankyou } from "./Thankyou";
 
 
 const PageResolver = () => {
@@ -18,11 +20,14 @@ const PageResolver = () => {
   
     case "shopproduct":
       return <ShopProduct page_template={"ShopProduct"}/>;
-      case "tracking":
+    case "thankyou":
+      return <Thankyou/>;
+    case "tracking":
       return <Tracking page_template={"tracking"}/>;
     case "register":
-    return <Register  page_template={"ShopProduct"}/>;
-
+    return <Register  page_template={"Register"}/>;
+    case "contactus":
+    return <ContactUs  page_template={"Contactus"}/>;
     case "cart":
     return <ShoppingCart page_template={"cart"} />;
 

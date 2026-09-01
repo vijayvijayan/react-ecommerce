@@ -272,23 +272,23 @@ export const Header = () => {
                 style={{ marginLeft: "40px" }}
               >
                 <li className="nav-item">
-                  <a href="/cart/index" className="nav-link">
+                  <NavLink to="/cart" className="nav-link">
                     <span className="ti-bag"></span>
                     <span style={{ marginLeft: "3px" }}>Cart</span>
                     <span> {
                         (shoppingCartFromStore.length>0) ? "("+shoppingCartFromStore.length+")" : ""
                       }</span>
-                  </a>
+                  </NavLink>
                 </li>
               </ul>
 
-              <ul className="nav navbar-nav navbar-right">
+              {/* <ul className="nav navbar-nav navbar-right">
                 <li className="nav-item">
                   <button className="search">
                     <span className="lnr lnr-magnifier" id="search"></span>
                   </button>
                 </li>
-              </ul>
+              </ul> */}
             </div>
 
           </div>

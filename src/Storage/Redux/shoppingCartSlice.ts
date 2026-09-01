@@ -1,8 +1,8 @@
  import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { shoppingCartModel } from "../../Interface";
 
- interface ShoppingCartState {
-  cartItems: shoppingCartModel[];
+export interface ShoppingCartState {
+    cartItems: shoppingCartModel[];
 }
 
  const initialStateCart: ShoppingCartState = {
@@ -47,7 +47,7 @@ import { shoppingCartModel } from "../../Interface";
         removeFromCart:(state,action)=>{
             //payload - cart item needs to be updated, newquantity
             state.cartItems=state.cartItems?.filter((item)=>{
-                if(item.productId===action.payload.cartItem.productId)
+                if(item.productId===action.payload)
                 {
                    return null;
                 }

@@ -1,3 +1,6 @@
+import storage from "redux-persist/lib/storage";
+import { persistReducer } from "redux-persist";
+import { persistStore } from "redux-persist";
 import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
 import homePageBannerApi from "../../Apis/homePageBannerApi";
 import { homePageBannerReducer } from "./homePageBannerSlice";
@@ -11,7 +14,8 @@ import { articleNewReducer } from "./articleNewSlice";
 import articleNewApi from "../../Apis/articleNewApi";
 import { userAuthReducer } from "./userAuth";
 import authApi from "../../Apis/authApi";
-import { shoppingCartReducer } from "./shoppingCartSlice";
+// import { shoppingCartReducer } from "./shoppingCartSlice";
+import { shoppingCartReducer, ShoppingCartState } from "./shoppingCartSlice";
 import shoppingCartApi from "../../Apis/shoppingCartApi";
 import orderApi from "../../Apis/orderApi";
 import countryApi from "../../Apis/countryApi";
@@ -19,11 +23,21 @@ import { orderReducer } from "./orderSlice";
 import blogApi from "../../Apis/blogApi";
 import { blogReducer } from "./blogSlice";
 import dealApi from "../../Apis/dealApi";
+import brandApi from "../../Apis/brandApi";
+import contactApi from "../../Apis/contactApi";
+import subscribeApi from "../../Apis/subscribeApi";
 
-
+const shoppingCartPersistConfig = {
+    key: "shoppingCart",
+    storage,
+};
 const store=configureStore({
     reducer:{
-      shoppingCartStore:shoppingCartReducer,
+      // shoppingCartStore:shoppingCartReducer,
+    shoppingCartStore: persistReducer<ShoppingCartState>(
+    shoppingCartPersistConfig,
+    shoppingCartReducer
+),
       [shoppingCartApi.reducerPath]:shoppingCartApi.reducer,
       homePageBannerStore:homePageBannerReducer,
        [homePageBannerApi.reducerPath]:homePageBannerApi.reducer,
@@ -43,6 +57,9 @@ const store=configureStore({
        [dealApi.reducerPath]:dealApi.reducer,
        blogStore:blogReducer,
        [blogApi.reducerPath]:blogApi.reducer,
+       [brandApi.reducerPath]:brandApi.reducer,
+       [contactApi.reducerPath]:contactApi.reducer,
+       [subscribeApi.reducerPath]:subscribeApi.reducer,
     },
     middleware:(getDefaultMiddleware)=>getDefaultMiddleware()
     .concat(homePageBannerApi.middleware)
@@ -56,7 +73,10 @@ const store=configureStore({
    .concat(blogApi.middleware)
    .concat(countryApi.middleware)
    .concat(dealApi.middleware)
+   .concat(brandApi.middleware)
+   .concat(contactApi.middleware)
+   .concat(subscribeApi.middleware)
 });
-
+export const persistor = persistStore(store);
 export type RootState=ReturnType<typeof store.getState>;
 export default store;

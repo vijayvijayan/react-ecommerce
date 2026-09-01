@@ -180,7 +180,7 @@ const [senderDetail,setSenderDetail]=useState(
                 <li><a href="#">{blogItem?.applicationUser?.fullName} <i className="lnr lnr-user"></i></a></li>
                 <li><a href="#">{blogItem?.createdDate} <i className="lnr lnr-calendar-full"></i></a></li>
                 <li><a href="#">{blogItem?.viewCount} Views <i className="lnr lnr-eye"></i></a></li>
-                <li><a href="#">06 Comments <i className="lnr lnr-bubble"></i></a></li>
+                <li><a href="#">{comment_data?.length} Comments <i className="lnr lnr-bubble"></i></a></li>
               </ul>
 
               <ul className="social-links">
@@ -252,7 +252,7 @@ const [senderDetail,setSenderDetail]=useState(
         </div>
 
         <div className="comments-area">
-          <h4>05 Comments</h4>
+          <h4>{comment_data?.length} Comments</h4>
         {comment_data!=null && comment_data?.map((item:any)=>(
           <BlogCommentCard  onReplyClicked={handleReply} blogCommentItem={item}/>
         )

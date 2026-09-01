@@ -1,2 +1,3 @@
-import store from "./Redux/store";
-export{store};
+import store, { persistor } from "./Redux/store";
+
+export { store, persistor };

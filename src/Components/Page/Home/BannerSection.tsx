@@ -93,12 +93,12 @@ if(banner_loading)
                 <p>
                  {item.shortDescription}
                 </p>
-                <div className="add-bag d-flex align-items-center">
+                {/* <div className="add-bag d-flex align-items-center">
                   <a className="add-btn" href="#">
                     <span className="lnr lnr-cross"></span>
                   </a>
                   <span className="add-text text-uppercase">Add to Bag</span>
-                </div>
+                </div> */}
               </div>
             </div>
 

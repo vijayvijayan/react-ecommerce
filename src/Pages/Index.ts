@@ -10,4 +10,6 @@ import { Checkout } from "./Checkout";
 import { Confirmation } from "./Confirmation";
 import { Blog } from "./Blog";
 import { BlogDetails } from "./BlogDetails";
-export{Blog,Confirmation,Login,Home,ProductDetails,ShopProduct,ShoppingCart,NotFound,PageResolver,Article,Checkout,BlogDetails}
+import { ContactUs } from "./ContactUs";
+import { Thankyou } from "./Thankyou";
+export{ContactUs,Blog,Confirmation,Login,Home,ProductDetails,ShopProduct,ShoppingCart,NotFound,PageResolver,Article,Checkout,BlogDetails,Thankyou}

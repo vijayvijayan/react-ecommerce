@@ -14,4 +14,5 @@ import { BlogPaginationResponse } from "./BlogPaginationResponse";
 import { BlogCommentRequestDTO } from "./BlogCommentRequestDTO";
 import { ShopProductRatingRequestDTO } from "./ShopProductRatingRequestDTO";
 import { dealProductModel } from "./dealProductModel";
-export type{dealProductModel,ShopProductRatingRequestDTO, BlogCommentRequestDTO,BlogPaginationResponse,blogModel,blogTypeModel,stateModel,countryModel,homePageBannerModel,menuModel,articleNewModel,userModel,shoppingCartModel,shopProductModel,OrderHeaderModel,orderDetailsModel}
+import { brandModel } from "./brandModel";
+export type{brandModel,dealProductModel,ShopProductRatingRequestDTO, BlogCommentRequestDTO,BlogPaginationResponse,blogModel,blogTypeModel,stateModel,countryModel,homePageBannerModel,menuModel,articleNewModel,userModel,shoppingCartModel,shopProductModel,OrderHeaderModel,orderDetailsModel}

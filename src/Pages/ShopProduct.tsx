@@ -1,15 +1,16 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BreadCrumbs } from '../Components/Page/BreadCrumbs'
 import { useDispatch } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { useGetArticleNewByMenuIdQuery, useGetArticleNewByTemplateQuery } from '../Apis/articleNewApi';
 import { setArticleNew } from '../Storage/Redux/articleNewSlice';
 import { MainLoader } from '../Components/Page/MainLoader';
-import { useGetShopCategoriesQuery, useGetshopProductQuery, useGetShopSubCategoriesQuery } from '../Apis/shopProductApi';
+import { useGetShopCategoriesQuery, useGetShopProductPaginationQuery, useGetshopProductQuery, useGetShopSubCategoriesQuery } from '../Apis/shopProductApi';
 import { shopCategoryModel } from '../Interface/shopCategoryModel';
 import { shopSubCategoryModel } from '../Interface/shopSubCategoryModel';
 import { shopProductModel } from '../Interface/shopProductModel';
 import { SD_Url } from '../Utility/SD';
+import { RelatedProductSection } from '../Components/Page/Home/RelatedProductSection';
 
 type PageProps = {
   page_template: string;
@@ -24,7 +25,32 @@ export const ShopProduct = ({page_template}:PageProps) => {
     const {data:category_data,isLoading:category_loading}=useGetShopCategoriesQuery(null);
     const {data:subcategory_data,isLoading:subcategory_loading}=useGetShopSubCategoriesQuery(null);
     
-    const{data:product_data,isLoading:product_loading,error:product_error}=useGetshopProductQuery({count:0,subCategoryId:0});
+     //const{data:product_data,isLoading:product_loading,error:product_error}=useGetshopProductQuery({count:0,subCategoryId:0});
+    const [page, setPage] = useState(1);
+    const [sort, setSort] = useState("default");
+    const [pageSize, setPageSize] = useState(12);
+    const{data:product_data,isLoading:product_loading,error:product_error}=useGetShopProductPaginationQuery({
+      subCategoryId:subCategoryId_formated,
+      page,
+      pageSize,
+      sort
+    });
+
+    const totalPages = product_data
+  ? Math.ceil(product_data.totalCount / product_data.pageSize)
+  : 0;
+
+  const handleFilterWithSort = (val: any) => {
+  setSort(val);
+  setPage(1);
+};
+
+ const handleFilterWithPageSize = (val: any) => {
+  setPageSize(Number(val));
+  setPage(1);
+};
+
+ 
    
     useEffect(() => {
         if(article_data) dispatch(setArticleNew(article_data));
@@ -32,6 +58,10 @@ export const ShopProduct = ({page_template}:PageProps) => {
 
       if (article_loading || category_loading || subcategory_loading || product_loading) {
           return <MainLoader />
+        }
+        else
+        {
+         console.log(product_data);
         }
        
       
@@ -44,9 +74,9 @@ export const ShopProduct = ({page_template}:PageProps) => {
       <div className="sidebar-categories">
         <div className="head">Browse Categories</div>
         <ul className="main-categories">
-          {category_data!=null && category_data.result.length>0 && category_data.result.map((item:shopCategoryModel)=>
+           {category_data!=null && category_data.result.length>0 && category_data.result.map((item:shopCategoryModel)=>
           {
-            const categoryCount= product_data!=null && product_data.result.length>0 ? product_data.result.filter((i:any)=>i.shopSubCategory?.shopCategoryId==item.shopCategoryId).length : 0;
+            const categoryCount= product_data!=null && product_data.products.length>0 ? product_data.products.filter((i:any)=>i.shopSubCategory?.shopCategoryId==item.shopCategoryId).length : 0;
             return(
               <li className="main-nav-list">
               <a
@@ -71,7 +101,7 @@ export const ShopProduct = ({page_template}:PageProps) => {
                 
                 subcategory_data!=null && subcategory_data.result.length>0 && subcategory_data.result.filter((i:shopSubCategoryModel)=>i.shopCategoryId==item.shopCategoryId).map((subitem:shopSubCategoryModel)=>
                   {
-                  const subcategoryCount= product_data!=null && product_data.result.length>0 ? product_data.result.filter((i:any)=>i.shopSubCategoryId==subitem.shopSubCategoryId).length : 0;
+                  const subcategoryCount= product_data!=null && product_data.products.length>0 ? product_data.products.filter((i:any)=>i.shopSubCategoryId==subitem.shopSubCategoryId).length : 0;
                   return(
                     <li className="main-nav-list child" key={subitem.shopSubCategoryId}>
                     <Link to={`/ShopProduct/${subitem.shopSubCategoryId}`}>{subitem.shopSubCategoryName}<span className="number">({subcategoryCount})</span></Link>
@@ -87,101 +117,84 @@ export const ShopProduct = ({page_template}:PageProps) => {
         }
 
           )
-          }
+          } 
           
 
         </ul>
       </div>
 
-      <div className="sidebar-filter mt-50">
-        <div className="top-filter-head">Product Filters</div>
+     
 
-        <div className="common-filter">
-          <div className="head">Brands</div>
-          <form>
-            <ul>
-              <li className="filter-list">
-                <input className="pixel-radio" type="radio" id="apple" name="brand" />
-                <label htmlFor="apple">Apple<span>(29)</span></label>
-              </li>
-              <li className="filter-list">
-                <input className="pixel-radio" type="radio" id="asus" name="brand" />
-                <label htmlFor="asus">Asus<span>(29)</span></label>
-              </li>
-              <li className="filter-list">
-                <input className="pixel-radio" type="radio" id="gionee" name="brand" />
-                <label htmlFor="gionee">Gionee<span>(19)</span></label>
-              </li>
-              <li className="filter-list">
-                <input className="pixel-radio" type="radio" id="micromax" name="brand" />
-                <label htmlFor="micromax">Micromax<span>(19)</span></label>
-              </li>
-              <li className="filter-list">
-                <input className="pixel-radio" type="radio" id="samsung" name="brand" />
-                <label htmlFor="samsung">Samsung<span>(19)</span></label>
-              </li>
-            </ul>
-          </form>
-        </div>
-
-        <div className="common-filter">
-          <div className="head">Color</div>
-          <form>
-            <ul>
-              <li className="filter-list">
-                <input className="pixel-radio" type="radio" id="black" name="color" />
-                <label htmlFor="black">Black<span>(29)</span></label>
-              </li>
-              <li className="filter-list">
-                <input className="pixel-radio" type="radio" id="blackleather" name="color" />
-                <label htmlFor="blackleather">Black Leather<span>(29)</span></label>
-              </li>
-              <li className="filter-list">
-                <input className="pixel-radio" type="radio" id="blackred" name="color" />
-                <label htmlFor="blackred">Black with red<span>(19)</span></label>
-              </li>
-              <li className="filter-list">
-                <input className="pixel-radio" type="radio" id="gold" name="color" />
-                <label htmlFor="gold">Gold<span>(19)</span></label>
-              </li>
-              <li className="filter-list">
-                <input className="pixel-radio" type="radio" id="spacegrey" name="color" />
-                <label htmlFor="spacegrey">Spacegrey<span>(19)</span></label>
-              </li>
-            </ul>
-          </form>
-        </div>
-
-        <div className="common-filter">
-          <div className="head">Price</div>
-          <div className="price-range-area">
-            <div id="price-range"></div>
-            <div className="value-wrapper d-flex">
-              <div className="price">Price:</div>
-              <span>$</span>
-              <div id="lower-value"></div>
-              <div className="to">to</div>
-              <span>$</span>
-              <div id="upper-value"></div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div className="col-xl-9 col-lg-8 col-md-7">
       <div className="filter-bar d-flex flex-wrap align-items-center">
         <div className="sorting">
-          <select>
+          <select className='sort form-control' onChange={(e)=>handleFilterWithSort(e.target.value)}>
             <option>Default sorting</option>
+            <option value="newest">Newest first</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            <option value="name_asc">Name: A to Z</option>
+            <option value="name_desc">Name: Z to A</option>
           </select>
         </div>
         <div className="sorting mr-auto">
-          <select>
+          <select className='pageSize form-control' onChange={(e)=>handleFilterWithPageSize(e.target.value)}>
             <option>Show 12</option>
+            <option value="24">Show 24</option>
+            <option value="36">Show 36</option>
+            <option value="48">Show 48</option>
           </select>
         </div>
-        <div className="pagination">
+
+        <div className="pagination" style={{float:'right'}}>
+
+      {/* Previous */}
+      {/* Previous */}
+<a
+  className={`page-item ${
+    page === 1 ? "pagination-disabled" : "prev-arrow"
+  }`}
+  onClick={() => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  }}
+  aria-disabled={page === 1}
+>
+  <i className="fa fa-long-arrow-left"></i>
+</a>
+
+      {/* Page Numbers */}
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+        <a href='#'
+          key={p}
+          onClick={() => setPage(p)}
+          className={`page-item ${p === page ? "active" : ""}`}
+        >
+          {String(p).padStart(2, "0")}
+        </a>
+      ))}
+
+      {/* Next */}
+      {/* Next */}
+<a
+  className={`page-item ${
+    page === totalPages ? "pagination-disabled" : "next-arrow"
+  }`}
+  onClick={() => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  }}
+  aria-disabled={page === totalPages}
+>
+  <i className="fa fa-long-arrow-right"></i>
+</a>
+
+    </div>
+        {/* <div className="pagination">
           <a href="#" className="prev-arrow">
             <i className="fa fa-long-arrow-left"></i>
           </a>
@@ -195,47 +208,30 @@ export const ShopProduct = ({page_template}:PageProps) => {
           <a href="#" className="next-arrow">
             <i className="fa fa-long-arrow-right"></i>
           </a>
-        </div>
+        </div> */}
       </div>
 
       <section className="lattest-product-area pb-40 category-list">
-        <div className="row">
+         <div className="row">
           
-          {product_data!=null && product_data.result.length &&   (subCategoryId_formated !== 0
-    ? product_data.result.filter(
+          {product_data!=null && product_data.products.length &&   (subCategoryId_formated !== 0
+    ? product_data.products.filter(
         (i: shopProductModel) =>
           i.shopSubCategoryId === subCategoryId_formated
       )
-    : product_data.result
+    : product_data.products
   ).map((item:shopProductModel)=>(
             <div className="col-lg-4 col-md-6">
               
                 <div className="single-product">
-                <img className="img-fluid" src={SD_Url.FileUploadPath+item.productImage} alt="" />
+                <Link to={`/productDetails/${item.shopProductId}`}><img className="img-fluid" src={SD_Url.FileUploadPath+item.productImage} alt="" /></Link>
                 <div className="product-details">
-                  <h6>{item.productName}</h6>
+                  <h6><Link to={`/productDetails/${item.shopProductId}`}>{item.productName}</Link></h6>
                   <div className="price">
                     <h6>${item.productSellingPrice?.toFixed(2)}</h6>
                     <h6 className="l-through">${item.productPrice?.toFixed(2)}</h6>
                   </div>
-                  <div className="prd-bottom">
-                    <a href="#" className="social-info">
-                      <span className="ti-bag"></span>
-                      <p className="hover-text">add to bag</p>
-                    </a>
-                    <a href="#" className="social-info">
-                      <span className="lnr lnr-heart"></span>
-                      <p className="hover-text">Wishlist</p>
-                    </a>
-                    <a href="#" className="social-info">
-                      <span className="lnr lnr-sync"></span>
-                      <p className="hover-text">compare</p>
-                    </a>
-                    <Link to={`/productDetails/${item.shopProductId}`} className="social-info">
-                      <span className="lnr lnr-move"></span>
-                      <p className="hover-text">view more</p>
-                    </Link>
-                  </div>
+
                 </div>
                 </div>
               
@@ -245,203 +241,66 @@ export const ShopProduct = ({page_template}:PageProps) => {
             
 
           
-        </div>
+        </div> 
       </section>
 
-      <div className="filter-bar d-flex flex-wrap align-items-center">
-        <div className="sorting mr-auto">
-          <select>
-            <option>Show 12</option>
-          </select>
-        </div>
-        <div className="pagination">
-          <a href="#" className="prev-arrow">
-            <i className="fa fa-long-arrow-left"></i>
-          </a>
-          <a href="#" className="active">1</a>
-          <a href="#">2</a>
-          <a href="#">3</a>
-          <a href="#" className="dot-dot">
-            <i className="fa fa-ellipsis-h"></i>
-          </a>
-          <a href="#">6</a>
-          <a href="#" className="next-arrow">
-            <i className="fa fa-long-arrow-right"></i>
-          </a>
-        </div>
-      </div>
+      <div style={{ marginBottom: "100px",display:"flow-root" }} className="filter-bar  flex-wrap align-items-center">
+        {/* d-flex */}
+  <div className=" mr-auto shop-product-pagination">
+  <div className="pagination" style={{float:'right'}}>
+
+      {/* Previous */}
+      {/* Previous */}
+<a
+  className={`page-item ${
+    page === 1 ? "pagination-disabled" : "prev-arrow"
+  }`}
+  onClick={() => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  }}
+  aria-disabled={page === 1}
+>
+  <i className="fa fa-long-arrow-left"></i>
+</a>
+
+      {/* Page Numbers */}
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+        <a href='#'
+          key={p}
+          onClick={() => setPage(p)}
+          className={`page-item ${p === page ? "active" : ""}`}
+        >
+          {String(p).padStart(2, "0")}
+        </a>
+      ))}
+
+      {/* Next */}
+      {/* Next */}
+<a
+  className={`page-item ${
+    page === totalPages ? "pagination-disabled" : "next-arrow"
+  }`}
+  onClick={() => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  }}
+  aria-disabled={page === totalPages}
+>
+  <i className="fa fa-long-arrow-right"></i>
+</a>
+
+    </div>
+  </div>
+</div>
+
     </div>
   </div>
     </div>
     {/* Start related-product Area */}
-    <section className="related-product-area section_gap">
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-lg-6 text-center">
-            <div className="section-title">
-              <h1>Deals of the Week</h1>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore
-                magna aliqua.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-lg-9">
-            <div className="row">
-              <div className="col-lg-4 col-md-4 col-sm-6 mb-20">
-                <div className="single-related-product d-flex">
-                  <a href="#">
-                    <img src="/img/r1.jpg" alt="" />
-                  </a>
-                  <div className="desc">
-                    <a href="#" className="title">Black lace Heels</a>
-                    <div className="price">
-                      <h6>$189.00</h6>
-                      <h6 className="l-through">$210.00</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-lg-4 col-md-4 col-sm-6 mb-20">
-                <div className="single-related-product d-flex">
-                  <a href="#">
-                    <img src="/img/r2.jpg" alt="" />
-                  </a>
-                  <div className="desc">
-                    <a href="#" className="title">Black lace Heels</a>
-                    <div className="price">
-                      <h6>$189.00</h6>
-                      <h6 className="l-through">$210.00</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-lg-4 col-md-4 col-sm-6 mb-20">
-                <div className="single-related-product d-flex">
-                  <a href="#">
-                    <img src="/img/r3.jpg" alt="" />
-                  </a>
-                  <div className="desc">
-                    <a href="#" className="title">Black lace Heels</a>
-                    <div className="price">
-                      <h6>$189.00</h6>
-                      <h6 className="l-through">$210.00</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-lg-4 col-md-4 col-sm-6 mb-20">
-                <div className="single-related-product d-flex">
-                  <a href="#">
-                    <img src="/img/r5.jpg" alt="" />
-                  </a>
-                  <div className="desc">
-                    <a href="#" className="title">Black lace Heels</a>
-                    <div className="price">
-                      <h6>$189.00</h6>
-                      <h6 className="l-through">$210.00</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-lg-4 col-md-4 col-sm-6 mb-20">
-                <div className="single-related-product d-flex">
-                  <a href="#">
-                    <img src="/img/r6.jpg" alt="" />
-                  </a>
-                  <div className="desc">
-                    <a href="#" className="title">Black lace Heels</a>
-                    <div className="price">
-                      <h6>$189.00</h6>
-                      <h6 className="l-through">$210.00</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-lg-4 col-md-4 col-sm-6 mb-20">
-                <div className="single-related-product d-flex">
-                  <a href="#">
-                    <img src="/img/r7.jpg" alt="" />
-                  </a>
-                  <div className="desc">
-                    <a href="#" className="title">Black lace Heels</a>
-                    <div className="price">
-                      <h6>$189.00</h6>
-                      <h6 className="l-through">$210.00</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-lg-4 col-md-4 col-sm-6">
-                <div className="single-related-product d-flex">
-                  <a href="#">
-                    <img src="/img/r9.jpg" alt="" />
-                  </a>
-                  <div className="desc">
-                    <a href="#" className="title">Black lace Heels</a>
-                    <div className="price">
-                      <h6>$189.00</h6>
-                      <h6 className="l-through">$210.00</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-lg-4 col-md-4 col-sm-6">
-                <div className="single-related-product d-flex">
-                  <a href="#">
-                    <img src="/img/r10.jpg" alt="" />
-                  </a>
-                  <div className="desc">
-                    <a href="#" className="title">Black lace Heels</a>
-                    <div className="price">
-                      <h6>$189.00</h6>
-                      <h6 className="l-through">$210.00</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-lg-4 col-md-4 col-sm-6">
-                <div className="single-related-product d-flex">
-                  <a href="#">
-                    <img src="/img/r11.jpg" alt="" />
-                  </a>
-                  <div className="desc">
-                    <a href="#" className="title">Black lace Heels</a>
-                    <div className="price">
-                      <h6>$189.00</h6>
-                      <h6 className="l-through">$210.00</h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="col-lg-3">
-            <div className="ctg-right">
-              <a href="#" target="_blank" rel="noreferrer">
-                <img
-                  className="img-fluid d-block mx-auto"
-                  src="/img/category/c5.jpg"
-                  alt=""
-                />
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <RelatedProductSection/>
     {/* End related-product Area */}
 
   </>

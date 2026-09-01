@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { shopProductModel } from "../../Interface";
 
 const initialState={
  shopProductItem:[],
@@ -11,8 +12,9 @@ export const shopProductSlice=createSlice({
     setShopProduct:(state,action)=>{
            state.shopProductItem=action.payload;
        },
+    
    },
 });
 
-export const {setShopProduct}=shopProductSlice.actions;
+export const {setShopProduct }=shopProductSlice.actions;
 export const shopProductReducer=shopProductSlice.reducer;

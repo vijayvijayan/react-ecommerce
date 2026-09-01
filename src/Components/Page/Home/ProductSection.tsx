@@ -76,16 +76,18 @@ const ProductSection = () => {
       {product_data!=null && product_data.result.length>0 && product_data.result.map((item:shopProductModel)=>(
         <div className="col-lg-3 col-md-6">
           <div className="single-product">
-            <img className="img-fluid" src={SD_Url.FileUploadPath+item.productImage} alt="" />
+            <Link to={`/productDetails/${item.shopProductId}`}><img className="img-fluid" src={SD_Url.FileUploadPath+item.productImage} alt="" /></Link>
+            
             <div className="product-details">
               <h6>
-               <Link to={`/productDetails/${41}/${item.shopProductId}`}>{item.productName}</Link> 
+               <Link to={`/productDetails/${item.shopProductId}`}>{item.productName}</Link> 
               </h6>
               <div className="price">
                 <h6>${item.productSellingPrice?.toFixed(2)}</h6>
                 <h6 className="l-through">${item.productPrice?.toFixed(2)}</h6>
               </div>
-              <div className="prd-bottom">
+
+              {/* <div className="prd-bottom">
                 <a href="#" className="social-info">
                   <span className="ti-bag"></span>
                   <p className="hover-text">add to bag</p>
@@ -102,7 +104,8 @@ const ProductSection = () => {
                   <span className="lnr lnr-move"></span>
                   <p className="hover-text">view more</p>
                 </a>
-              </div>
+              </div> */}
+
             </div>
           </div>
         </div>

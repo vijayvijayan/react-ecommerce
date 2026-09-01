@@ -10,17 +10,20 @@ import { RootState } from '../Storage/Redux/store';
 import { shoppingCartModel, shopProductModel } from '../Interface'
 import { useGetCartQuery } from '../Apis/shoppingCartApi'
 import { SD_Url } from '../Utility/SD'
+
+import { removeFromCart } from '../Storage/Redux/shoppingCartSlice'
 type PageProps = {
   page_template: string;
 };
 function ShoppingCart({page_template}:PageProps) {
+  
     const dispatch=useDispatch();
     const {data:article_data,isLoading:article_loading,error:article_error}=useGetArticleNewByTemplateQuery(page_template);
     
 
-     useEffect(() => {
-            if(article_data) dispatch(setArticleNew(article_data));
-          }, [article_data, dispatch]);
+    //  useEffect(() => {
+    //         if(article_data) dispatch(setArticleNew(article_data));
+    //       }, [article_data, dispatch]);
 
     const shoppingCartFromStore = useSelector(
        (state: RootState) => state.shoppingCartStore.cartItems
@@ -28,10 +31,26 @@ function ShoppingCart({page_template}:PageProps) {
 
     const {data:cart_data,isLoading:cart_loading,error:cart_error}=useGetCartQuery(shoppingCartFromStore);
 
-    if(article_loading && cart_loading)
+  //   const handleRemoveItem=(productId:number|undefined)=>{
+  //     dispatch(removeShopProduct(productId));
+  //     console.log(cart_data);
+  // }
+
+  const handleRemoveItem = (productId: number | undefined) => {
+    console.log("productId:", productId);
+    console.log("typeof productId:", typeof productId);
+
+    if (productId === undefined) return;
+
+    dispatch(removeFromCart(productId));
+    console.log(cart_data);
+};
+
+    if(article_loading || cart_loading)
     {
         return <MainLoader/>
     }
+  
    
    
   const totalPrice =
@@ -116,6 +135,11 @@ function ShoppingCart({page_template}:PageProps) {
 
                     <td>
                       <h5>${((item.productSellingPrice ?? 0)* (item.tempProductRequestedQuantity ?? 0)).toFixed(2)}</h5>
+                    </td>
+                    <td>
+                      <a className="btn btn-outline-danger Delete" onClick={()=>handleRemoveItem(item.shopProductId)}>
+                        <i className="fa fa-trash" aria-hidden="true"></i>
+                      </a>
                     </td>
                   </tr>
               )

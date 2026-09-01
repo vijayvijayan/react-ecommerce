@@ -1,4 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+type ShopProductPaginationParams = {
+  subCategoryId: number;
+  page: number;
+  pageSize: number;
+  sort:string;
+};
 
 const shopProductApi = createApi({
   reducerPath: "shopProductApi",
@@ -57,6 +63,13 @@ const shopProductApi = createApi({
       providesTags:["shopProduct"]
   }),
 
+  getShopProductPagination: builder.query<any, ShopProductPaginationParams>({
+    query: ({ subCategoryId, page, pageSize,sort }) => ({
+        url: `shopproduct/${subCategoryId}/${page}/${pageSize}/${sort}`,
+    }),
+    providesTags: ["shopProduct"],
+    }),
+
   }),
 });
 
@@ -67,6 +80,7 @@ export const {
   useGetshopProductByIdQuery,
   useGetShopCategoriesQuery,
   useGetShopSubCategoriesQuery,
+  useGetShopProductPaginationQuery
 } = shopProductApi;
 
 export default shopProductApi;

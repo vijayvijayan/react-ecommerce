@@ -1,6 +1,145 @@
-import React from 'react'
+import React, { useRef, useState } from 'react'
+import { useCreateSubscribeMutation } from '../../Apis/subscribeApi';
+import apiResponse from '../../Interface/apiResponse';
+import { toastNotify } from '../../Helper';
+import { useGetMenuQuery } from '../../Apis/menuApi';
+import { MainLoader } from '../Page/MainLoader';
+import { menuModel } from '../../Interface';
+import { Link } from 'react-router-dom';
 
 export const Footer = () => {
+  interface subscribeModel {
+  email: string;
+}
+  const subscribeItem: subscribeModel = {
+    email: '',
+  };
+const [subscribeInputs, setSubscribeInputs]=useState(subscribeItem);
+  const[createSubscribe]=useCreateSubscribeMutation();
+   const [isProcessing,setIsProcessing]=useState(false);
+   const rfvSubscription= useRef<HTMLSpanElement | null>(null);
+    const rfvSubscriptionEmailIdExpression= useRef<HTMLSpanElement | null>(null);
+    const{data:menu_data,isLoading:menu_loading,error:menu_error}=useGetMenuQuery(null);
+    const footer_menu=menu_data!=null && menu_data.result.length>0 ? menu_data.result.filter((i:menuModel)=>i.showInFooter==true):null;
+
+    const handleSubscribeInput = (
+         e: React.ChangeEvent<
+           HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+         >
+       ) => {
+         const { name, value } = e.target;
+         setSubscribeInputs((prevState) => ({
+           ...prevState,
+           [name]: value, // Update the specific field based on its name
+         }));
+       };
+
+        const handleSubmit = async (event:React.FormEvent<HTMLFormElement>) => {
+                event.preventDefault();
+                var isValid=true;
+                if (subscribeInputs.email === '') {
+                  if (rfvSubscription.current) {
+                    rfvSubscription.current.className = ''; 
+                    rfvSubscription.current.className = 'validation-message'; // Show the error message
+                    rfvSubscription.current.style.display = 'block'; 
+                    rfvSubscription.current.innerHTML="Enter Email Id";
+                    }
+                   
+                    isValid=false;
+                  } 
+                else {
+                    if (rfvSubscription.current) {
+                      rfvSubscription.current.style.display = 'none'; // Hide the error message
+                      if(subscribeInputs.email.match('@'))
+                      {
+                          if (rfvSubscriptionEmailIdExpression.current) 
+                            rfvSubscriptionEmailIdExpression.current.style.display = 'none'; 
+                      }
+                      else
+                      {
+                          if (rfvSubscriptionEmailIdExpression.current) 
+                            rfvSubscriptionEmailIdExpression.current.style.display = 'block'; 
+                         
+                          isValid=false;
+                      }
+                    }
+                }
+                if(isValid==false)
+                  {
+                     return;
+                  }
+                
+               //const formData = new FormData();
+            
+               //formData.append('EmailId', subscribeInputs.email); 
+              
+               try {
+                   const response: apiResponse = await createSubscribe(
+                    {
+                      emailId:subscribeInputs.email
+                    }
+                  ); // Send the FormData
+                   if (response) {
+                       console.log(response.data?.isSuccess);
+                       //if(response.data?.isSuccess))
+                    if (response.data?.isSuccess == true)
+                    {
+                      if (rfvSubscription.current)
+                      {
+                        toastNotify("Subscribed Successfully!");
+                        rfvSubscription.current.style.display = 'block'; 
+                        rfvSubscription.current.className = ''; 
+                        rfvSubscription.current.className = 'validation-message-success'; 
+                        rfvSubscription.current.innerHTML="Subscribed Successfully";
+                      }
+                      
+                    }
+                    else
+                    {
+                        if (response.data?.statusCode == 302)
+                        {
+                          if (rfvSubscription.current)
+                            {
+                              toastNotify("Already Subscribed!","error");
+                              rfvSubscription.current.style.display = 'block'; 
+                              rfvSubscription.current.className = ''; 
+                              rfvSubscription.current.className = 'validation-message'; 
+                              rfvSubscription.current.innerHTML="Already Subscribed";
+                            }
+                        }
+                        else
+                        {
+                          if (rfvSubscription.current)
+                            {
+                              toastNotify("Error Occurred!","error");
+                              rfvSubscription.current.style.display = 'block'; 
+                              rfvSubscription.current.className = ''; 
+                              rfvSubscription.current.className = 'validation-message'; 
+                              rfvSubscription.current.innerHTML="Error Occurred";
+                            }
+                        }
+                    }
+                    // navigate("/thankyou"); // Navigate after successful submission
+                   }
+                 } catch (error) {
+                   console.error('Error during submission', error);
+                 }
+               setIsProcessing(false);
+              }
+
+      if(menu_loading)
+      {
+        return <MainLoader/>
+      }
+      else
+      {
+        // console.log(menu_data);
+        if(footer_menu!=null)
+        {
+          console.log(footer_menu);
+        }
+      }
+
   return (
     <footer className="footer-area section_gap">
   <div className="container">
@@ -23,26 +162,27 @@ export const Footer = () => {
 
           <div id="mc_embed_signup">
             <form
-              target="_blank"
-              action="https://spondonit.us12.list-manage.com/subscribe/post?u=1462626880ade1ac87bd9c93a&id=92a4423d01"
-              method="get"
+              onSubmit={handleSubmit}
+              method="post"
               className="form-inline"
               noValidate
             >
               <div className="d-flex flex-row">
                 <input
                   className="form-control"
-                  name="EMAIL"
-                  placeholder="Enter Email"
-                  required
-                  type="email"
+                  placeholder="Your email"
+              name='email'
+              onChange={handleSubscribeInput} 
+              value={subscribeInputs.email}
+                  type="text"
                 />
 
                 <button className="click-btn btn btn-default" type="submit">
                   <i className="fa fa-long-arrow-right" aria-hidden="true"></i>
                 </button>
 
-                <div style={{ position: "absolute", left: "-5000px" }}>
+                
+                {/* <div style={{ position: "absolute", left: "-5000px" }}>
                   <input
                     name="b_36c4fd991d266f23781ded980_aefe40901a"
                     tabIndex={-1}
@@ -50,27 +190,27 @@ export const Footer = () => {
                     type="text"
                     readOnly
                   />
-                </div>
+                </div> */}
+                
               </div>
 
-              <div className="info"></div>
+              {/* <div className="info"></div> */}
+              <span ref={rfvSubscription}   style={{display:"none"}}></span>
+              <span ref={rfvSubscriptionEmailIdExpression} className="text-danger" style={{display:"none"}}>Invalid Email Id</span>
             </form>
           </div>
         </div>
       </div>
 
       <div className="col-lg-3 col-md-6 col-sm-6">
-        <div className="single-footer-widget mail-chimp">
-          <h6 className="mb-20">Instagram Feed</h6>
-          <ul className="instafeed d-flex flex-wrap">
-            <li><img src="img/i1.jpg" alt="" /></li>
-            <li><img src="img/i2.jpg" alt="" /></li>
-            <li><img src="img/i3.jpg" alt="" /></li>
-            <li><img src="img/i4.jpg" alt="" /></li>
-            <li><img src="img/i5.jpg" alt="" /></li>
-            <li><img src="img/i6.jpg" alt="" /></li>
-            <li><img src="img/i7.jpg" alt="" /></li>
-            <li><img src="img/i8.jpg" alt="" /></li>
+        <div className="single-footer-widget">
+          <h6>Useful Links</h6>
+          <ul className="footer-links">
+            {
+              footer_menu!=null && footer_menu.length>0 && footer_menu.map((item:menuModel)=>(
+                <li><Link to={"/"+item.template}>{item.menuName}</Link></li>
+              ))
+            }
           </ul>
         </div>
       </div>
@@ -92,11 +232,7 @@ export const Footer = () => {
 
     <div className="footer-bottom d-flex justify-content-center align-items-center flex-wrap">
       <p className="footer-text m-0">
-        Copyright © {new Date().getFullYear()} All rights reserved | This template is made with{" "}
-        <i className="fa fa-heart-o" aria-hidden="true"></i> by{" "}
-        <a href="https://colorlib.com" target="_blank" rel="noreferrer">
-          Colorlib
-        </a>
+        Copyright © {new Date().getFullYear()} All rights reserved
       </p>
     </div>
   </div>

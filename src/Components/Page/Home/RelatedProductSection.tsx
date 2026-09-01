@@ -3,6 +3,7 @@ import { useGetDealQuery } from '../../../Apis/dealApi';
 import { MainLoader } from "../MainLoader";
 import { dealProductModel } from '../../../Interface';
 import { SD_Url } from '../../../Utility/SD';
+import { Link } from 'react-router-dom';
 export const RelatedProductSection = () => {
   const{data:deal_data,isLoading:deal_loading}=useGetDealQuery(3);
   if(deal_loading)
@@ -39,11 +40,11 @@ export const RelatedProductSection = () => {
            deal_data!=null && deal_data?.result?.length>0 && deal_data.result.map((item:dealProductModel,index:number)=>(
              <div className="col-lg-4 col-md-4 col-sm-6 mb-20" key={index}>
             <div className="single-related-product d-flex">
-              <a href="#">
+              <Link to={`/productDetails/${item.shopProductId}`}>
                 <img style={{width:"70px"}} src={SD_Url.FileUploadPath+item.shopProduct?.productImage} alt="" />
-              </a>
+              </Link>
               <div className="desc">
-                <a href="#" className="title">{item.shopProduct?.productName}</a>
+                <Link to={`/productDetails/${item.shopProductId}`} className="title">{item.shopProduct?.productName}</Link>
                 <div className="price">
                   <h6>${item.shopProduct?.productSellingPrice}</h6>
                   <h6 className="l-through">${item.shopProduct?.productPrice}</h6>
