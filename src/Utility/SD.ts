@@ -1,5 +1,5 @@
 export enum SD_Url{
-    FileUploadPath="https://vijayvijayans3.s3.us-east-2.amazonaws.com/uploads/"
+    FileUploadPath="/uploads/"
 }
 export enum SD_Roles{
     ADMIN="admin",
