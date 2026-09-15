@@ -15,7 +15,7 @@ export const Thankyou = () => {
               </a>
               
               
-              <a href="single-product.html">Thank you</a>
+              <a href="#">Thank you</a>
             </nav>
           </div>
         </div>

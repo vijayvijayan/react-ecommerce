@@ -26,7 +26,7 @@ export const BreadCrumbs = ({article}:lclArticleModel) => {
                 ""
               }
               
-              <a href="single-product.html">{article.pageHeading}</a>
+              <a href="#">{article.pageHeading}</a>
             </nav>
           </div>
         </div>
