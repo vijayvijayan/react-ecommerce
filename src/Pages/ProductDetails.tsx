@@ -35,10 +35,15 @@ const [shopProductRatingInsert]=useShopProductRatingInsertMutation();
   useGetshopProductByIdQuery(productId);
 
 const { data: photogallery_data, isLoading: photogallery_loading } =
-  useGetPhotoGalleryByIdQuery({
-    galleryTypeId: productId,
-    galleryType: "shopproduct",
-  });
+  useGetPhotoGalleryByIdQuery(
+    {
+      galleryTypeId: productId,
+      galleryType: "shopproduct",
+    },
+    {
+      skip: !product_data
+    }
+  );
 
 
 // ================= Photo Gallery =================
@@ -71,7 +76,8 @@ const { data: productRating_data, isLoading: productRating_loading } = useGetSho
   
 
     const [overAllRating,setOverAllRating]=useState(0);
-  const [productRating,setProductRating]=useState(0);  
+  const [productRating,setProductRating]=useState(0);
+  const [selectedImage, setSelectedImage] = useState("");
   const unSelectedProductRating= 5-productRating;
 
   const handleProductRating=(val:number)=>{
@@ -253,40 +259,23 @@ const handleSubmit=async (e:React.FormEvent<HTMLFormElement>)=>{
 // });
 // }, [photogallery_data]); // 👈 VERY IMPORTANT
 
-// ================= Owl Carousel =================
+// ================= Product Image =================
 
-useEffect(() => {
-  const $ = (window as any).$;
-
-  if (!$) return;
-
-  const $carousel = $(".s_Product_carousel");
-
-  if (!$carousel.length) return;
-
-  // Destroy previous carousel
-  if ($carousel.hasClass("owl-loaded")) {
-    $carousel.trigger("destroy.owl.carousel");
-  }
-
-  // Initialize
-  $carousel.owlCarousel({
-    items: 1,
-    loop: photoGalleryList.length > 1,
-    autoplay: photoGalleryList.length > 1,
-    autoplayTimeout: 3000,
-    autoplayHoverPause: true,
-    nav: false,
-    dots: false,
-  });
-
-  // Cleanup
-  return () => {
-    if ($carousel.hasClass("owl-loaded")) {
-      $carousel.trigger("destroy.owl.carousel");
+  useEffect(() => {
+    if (photoGalleryList.length > 0 && photoGalleryList[0].image) {
+      setSelectedImage(
+        SD_Url.FileUploadPath + photoGalleryList[0].image
+      );
     }
+  }, [photoGalleryList]);
+
+  const handleImageSelect = (image: string | undefined) => {
+    if (!image) return;
+
+    setSelectedImage(
+      SD_Url.FileUploadPath + image
+    );
   };
-}, [photoGalleryList]);
 
 
 const[productCount,setProductCount]= useState(1);
@@ -355,17 +344,40 @@ const handleCart = () => {
         </div>
       </div> */}
 <div className="col-lg-6">
-  <div className="s_Product_carousel">
+
+  {/* Main Product Image */}
+
+  <div className="main-product-image">
+
+    <img
+      className="img-fluid"
+      src={selectedImage}
+      alt="Product Image"
+    />
+
+  </div>
+
+
+  {/* Thumbnail Images */}
+
+  <div className="thumbnail-container">
+
     {photoGalleryList.map((item: photoGalleryModel) => (
-      <div className="single-prd-item" key={item.id}>
+
+      item.image && (
         <img
-          className="img-fluid"
+          key={item.id}
+          className="thumbnail-image"
           src={SD_Url.FileUploadPath + item.image}
           alt={item.title || "Product Image"}
+          onClick={() => handleImageSelect(item.image)}
         />
-      </div>
+      )
+
     ))}
+
   </div>
+
 </div>
       <div className="col-lg-5 offset-lg-1">
         <div className="s_product_text">

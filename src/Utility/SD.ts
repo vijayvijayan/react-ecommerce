@@ -12,10 +12,5 @@ StatusShipped = "Shipped",
 StatusDelivered = "Delivered",
 StatusCompleted = "Completed",
 StatusCancelled="Cancelled"
-    // PENDING = "Pending",
-    // CONFIRMED = "Confirmed",
-    // BEING_COOKED = "Being Cooked",
-    // READY_FOR_PICKUP = "Ready for Pickup",
-    // COMPLETED = "Completed",
-    // CANCELLED = "Cancelled",
+ 
   }
